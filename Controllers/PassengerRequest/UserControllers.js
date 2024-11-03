@@ -1,9 +1,8 @@
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import jwt from 'jsonwebtoken';
-import connection from '../Database/Connection/Connection.js';
-
-import { checkEmailExists, registerUserQuery, getUserByEmail } from '../Database/UserQuries/userQuries.js'; // Add .js
+import connection from '../../Database/Connection/Connection.js';
+import { checkEmailExists, registerUserQuery, getUserByEmail } from '../../Database/UserQuries/userQuries.js'; // Add .js
 
 const createToken = (id) => {
     const jwtkey = process.env.JWT_SECRET_KEY;
@@ -13,15 +12,15 @@ const createToken = (id) => {
 const registerUser = async (req, res) => {
     try {
         const { userLn, userFn, userEmail, userPhone, userPassword, userType, userRating } = req.body;
-        
+
         const emailExists = await checkEmailExists(userEmail);
         if (emailExists) {
             return res.status(400).send({ message: "Email is already in use" });
         }
 
         // Hash the password
-        const salt = await bcrypt.genSalt(10)   
-        const hashedPassword  = await bcrypt.hash(userPassword,salt)
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(userPassword, salt)
 
         // Insert the new user
         await registerUserQuery({
@@ -44,7 +43,9 @@ const registerUser = async (req, res) => {
 const logInUser = async (req, res) => {
     try {
         const { userEmail, userPassword } = req.body;
-        
+        if (!userEmail && !userPassword) {
+            return res.status(400).send({ message: "Please fill necessary details below " });
+        }
         const emailExists = await checkEmailExists(userEmail);
         if (!emailExists) {
             return res.status(400).send({ message: "Email not registered!" });
@@ -55,25 +56,19 @@ const logInUser = async (req, res) => {
             return res.status(400).send({ message: "User not found!" });
         }
 
-       
-        const isMatch = await bcrypt.compare(userPassword,user.userPassword)
+        const isMatch = await bcrypt.compare(userPassword, user.userPassword)
         if (!isMatch) {
             return res.status(400).send({ message: "Invalid password" });
         }
 
         const token = createToken(user.userId);
         res.status(200).send({
-            message: "Login successfully",
-            token,
             user: {
                 id: user.userId,
-                userFn: user.userFn,
-                userLn: user.userLn,
                 userEmail: user.userEmail,
-                userPhone: user.userPhone,
-                userType: user.userType,
-                userRating: user.userRating
-            }
+            },
+            token,
+
         });
     } catch (err) {
         console.error(err);
