@@ -7,6 +7,7 @@ import userRoute from './Routes/userRoutes.js'
 import driverRoute from './Routes/driverRoutes.js'
 import { initSocket } from './config/socket.js'
 
+
 dotenv.config()
 const app = express();
 const server = createServer(app)
