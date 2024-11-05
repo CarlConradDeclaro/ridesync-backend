@@ -1,9 +1,13 @@
 import express from 'express'
-import { GetRequest } from '../Controllers/DriverRequest/GetRequest.js'
+import { GetAllRideRequest } from '../Controllers/Driver/GetAllRideRequest.js'
+import { PotentialRide } from '../Controllers/Driver/PotentialRide.js'
+import { driverLogin, driverRegisterUser } from '../Controllers/Driver/DriverController.js'
 const router = express.Router()
 
 
-
-router.get('/passengerRequest', GetRequest)
+router.post("/register", driverRegisterUser)
+router.post("/login", driverLogin)
+router.get('/passengerRequest', GetAllRideRequest)
+router.post('/potentialRide', PotentialRide)
 
 export default router;

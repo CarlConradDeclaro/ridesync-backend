@@ -1,8 +1,8 @@
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import jwt from 'jsonwebtoken';
-import connection from '../../Database/Connection/Connection.js';
-import { checkEmailExists, registerUserQuery, getUserByEmail } from '../../Database/UserQuries/userQuries.js'; // Add .js
+import connection from '../Database/Connection/Connection.js';
+import { checkEmailExists, registerUserQuery, getUserByEmail } from '../Database/UserQuries/userQuries.js'; // Add .js
 
 const createToken = (id) => {
     const jwtkey = process.env.JWT_SECRET_KEY;
@@ -11,7 +11,7 @@ const createToken = (id) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { userLn, userFn, userEmail, userPhone, userPassword, userType, userRating } = req.body;
+        const { userLn, userFn, userEmail, userPhone, userPassword, userType, userRating, gender, country, demoStat } = req.body;
 
         const emailExists = await checkEmailExists(userEmail);
         if (emailExists) {
@@ -30,7 +30,10 @@ const registerUser = async (req, res) => {
             userPhone,
             userPassword: hashedPassword,
             userType,
-            userRating
+            userRating,
+            gender,
+            country,
+            demoStat
         });
 
         res.status(201).send({ message: "User registered successfully!" });
@@ -66,6 +69,7 @@ const logInUser = async (req, res) => {
             user: {
                 id: user.userId,
                 userEmail: user.userEmail,
+                userType: user.userType
             },
             token,
 

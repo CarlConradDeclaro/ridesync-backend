@@ -1,8 +1,9 @@
 import express from 'express'
 
-import { registerUser, getUsers, logInUser } from '../Controllers/PassengerRequest/UserControllers.js';
-import { RouteCancelled, RouteRequest } from '../Controllers/PassengerRequest/RoutesRequest.js'
-import { Location } from '../Controllers/PassengerRequest/Map.js'
+import { registerUser, getUsers, logInUser } from '../Controllers/UserControllers.js';
+import { getRouteRequest, RouteCancelled, RouteRequest } from '../Controllers/Passenger/RoutesRequest.js'
+import { Location } from '../Controllers/Passenger/Map.js'
+import { CancelledAllPotentialDrivers, GetAllPotentialRide } from '../Controllers/Passenger/GetPotentialDriver.js';
 
 
 
@@ -11,6 +12,10 @@ const router = express.Router()
 router.get("/", getUsers)
 router.get('/search', Location)
 
+router.post('/getPotentialRide', GetAllPotentialRide)
+router.put('/cancelAllPotentialDrivers', CancelledAllPotentialDrivers)
+
+router.post("/getRouteRequest", getRouteRequest)
 
 router.post("/register", registerUser)
 router.post("/login", logInUser)

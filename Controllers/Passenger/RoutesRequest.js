@@ -1,19 +1,40 @@
-import Joi from 'joi'
 import connection from '../../Database/Connection/Connection.js';
+import { routeSchema } from '../../models/routeSchema.js';
 
 
-const routeSchema = Joi.object({
-    userId: Joi.number().required(),
-    startLocation: Joi.string().required(),
-    endLocation: Joi.string().required(),
-    estimatedDuration: Joi.number().required(),
-    distance: Joi.number().required(),
-    totalAmount: Joi.number().required(),
-    startLatitude: Joi.number().required(),
-    startLongitude: Joi.number().required(),
-    endLatitude: Joi.number().required(),
-    endLongitude: Joi.number().required()
-});
+
+
+const getRouteRequest = async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const query = `
+        SELECT * FROM Routes
+        WHERE userId = ? AND status = 'pending'  
+    `;
+
+    try {
+        connection.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error fetching routes." });
+            }
+
+            if (results.length === 0) {
+                return res.status(404).json({ message: "No routes found for this user." });
+            }
+
+            res.json(results); // Return the fetched routes
+        });
+    } catch (error) {
+        console.error("Error fetching routes:", error);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+
 
 
 const RouteRequest = async (req, res) => {
@@ -77,4 +98,4 @@ const RouteCancelled = async (req, res) => {
 
 
 
-export { RouteRequest, RouteCancelled }
+export { RouteRequest, RouteCancelled, getRouteRequest }

@@ -1,6 +1,6 @@
 import connection from "../../Database/Connection/Connection.js"
 
-const GetRequest = (req, res) => {
+const GetAllRideRequest = (req, res) => {
 
     connection.query('SELECT * FROM Routes WHERE status = "pending"', (err, results) => {
         if (err) {
@@ -13,4 +13,6 @@ const GetRequest = (req, res) => {
 
 }
 
-export { GetRequest }
+
+
+export { GetAllRideRequest }
