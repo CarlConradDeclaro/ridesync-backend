@@ -1,12 +1,12 @@
 import connection from "../../Database/Connection/Connection.js";
 
 const GetAllPotentialRide = async (req, res) => {
-    const { userId } = req.body
+    const { userId, status } = req.body
     const query = `
     SELECT * FROM  PotentialDrivers
-    WHERE passengerId = ? AND status = "pending"
+    WHERE passengerId = ? AND status = ?
 `;
-    connection.query(query, [userId], (err, results) => {
+    connection.query(query, [userId, status], (err, results) => {
         if (err) {
             console.error(err);
             res.status(500).send({ message: 'error fetching data' })
@@ -14,6 +14,68 @@ const GetAllPotentialRide = async (req, res) => {
             res.json(results)
         }
     })
+}
+
+
+
+const driverSelected = async (req, res) => {
+    const { userId, driverId } = req.body;
+
+    const query1 = `
+        UPDATE PotentialDrivers
+        SET status = 'matched'
+        WHERE passengerId = ? AND status = "waiting"
+    `;
+
+    const query2 = `
+        UPDATE Routes
+        SET status = 'onGoing'
+        WHERE userId = ? AND status = "pending"
+    `;
+    const query3 = `
+        UPDATE Rides
+        SET rideStatus = 'onGoing'
+        WHERE driverId = ? AND rideStatus = "pending"
+        `;
+
+    try {
+        // Wrap the query in a promise to handle both asynchronously
+        const updateQuery1 = new Promise((resolve, reject) => {
+            connection.query(query1, [userId], (err, results) => {
+                if (err) reject(err);
+                else resolve(results);
+            });
+        });
+
+        const updateQuery2 = new Promise((resolve, reject) => {
+            connection.query(query2, [userId], (err, results) => {
+                if (err) reject(err);
+                else resolve(results);
+            });
+        });
+
+        const updateQuery3 = new Promise((resolve, reject) => {
+            connection.query(query3, [driverId], (err, results) => {
+                if (err) reject(err);
+                else resolve(results);
+            });
+        });
+
+
+        // Wait for both updates to complete
+        const [result1, result2] = await Promise.all([updateQuery1, updateQuery2, updateQuery3]);
+
+        res.json({ message: 'Status updated to onGoing' });
+    } catch (err) {
+        console.error("Error updating status:", err);
+        res.status(500).send({ message: 'Error updating status in database' });
+    }
+};
+
+
+
+const cancelledRide = async (req, res) => {
+    // const 
 }
 
 
@@ -51,4 +113,33 @@ const CancelledAllPotentialDrivers = async (req, res) => {
 
 
 
-export { GetAllPotentialRide, CancelledAllPotentialDrivers }
+const getRides = async (req, res) => {
+    const { driverId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const query = `
+        SELECT * FROM Rides
+        WHERE driverId = ? AND status = 'onGoing' 
+    `;
+
+    try {
+        connection.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error fetching routes." });
+            }
+
+
+            res.json(results);
+        });
+    } catch (error) {
+        console.error("Error fetching routes:", error);
+        res.status(500).json({ message: "Server error." });
+
+    }
+}
+
+export { GetAllPotentialRide, CancelledAllPotentialDrivers, driverSelected, getRides }

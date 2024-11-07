@@ -1,4 +1,4 @@
-import { addNewUser, handleOfferRide } from "../socket/SocketHandler.js";
+import { addNewUser, handleAcceptRide, handleCancelRide, handleOfferRide } from "../socket/SocketHandler.js";
 
 let onlineUsers = [];
 
@@ -19,12 +19,27 @@ export const initSocket = (io) => {
         // Handle canceled requests
         socket.on("cancelled", (id) => {
             io.emit('getCancelledRequest', id);
+            console.log("cancelld");
+
         });
 
         // Handle offer ride
         socket.on("offerRide", (userId, driverId) => {
             handleOfferRide(io, socket, userId, driverId);
         });
+
+        socket.on("passenger", (passengerId, driverId) => {
+            console.log("your passenger is ", passengerId);
+            //    io.emit("yourPassenger", passengerId)
+            handleAcceptRide(io, socket, passengerId, driverId)
+
+        })
+
+        socket.on("cancelledRide", (userId, driverId) => {
+            console.log("your about to be cancelled", driverId);
+
+            handleCancelRide(io, socket, userId, driverId)
+        })
 
 
         // Handle disconnect

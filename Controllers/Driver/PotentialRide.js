@@ -28,5 +28,68 @@ const PotentialRide = async (req, res) => {
 
 
 
+const Ride = async (req, res) => {
 
-export { PotentialRide }
+
+    const { driverId, routeId, } = req.body;
+    console.log("Received data:", req.body)
+
+    const query = `
+       INSERT INTO RIDES(driverId,routeId)
+       VALUES(?,?)
+    `
+
+    try {
+        const result = await new Promise((resolve, reject) => {
+            connection.query(query, [driverId, routeId], (err, results) => {
+                if (err) return reject(err)
+                resolve(results)
+            })
+        })
+
+        if (result.affectedRows > 0)
+            res.status(200).json({ message: "potential Drivers added successfully", status: true });
+        else
+            res.status(400).json({ message: "Failed to add" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Server error" });
+    }
+
+}
+
+
+const getRides = async (req, res) => {
+
+
+    const { driverId, routeId, } = req.body;
+    console.log("Received data:", req.body)
+
+    const query = `
+        SELECT * FROM RIDES
+        WHERE status = ? 
+    `
+
+    try {
+        const result = await new Promise((resolve, reject) => {
+            connection.query(query, [driverId, routeId], (err, results) => {
+                if (err) return reject(err)
+                resolve(results)
+            })
+        })
+
+        if (result.affectedRows > 0)
+            res.status(200).json({ message: "potential Drivers added successfully", status: true });
+        else
+            res.status(400).json({ message: "Failed to add" });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Server error" });
+    }
+
+}
+
+
+export { PotentialRide, Ride, getRides }

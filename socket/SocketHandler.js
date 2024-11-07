@@ -24,3 +24,28 @@ export const handleOfferRide = (io, socket, userId, driverId) => {
         console.log(`User with ID ${userId} is not online.`);
     }
 };
+
+export const handleAcceptRide = (io, socket, userId, driverId) => {
+    const targetUser = onlineUsers.find(user => user.userId === driverId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("yourPassenger", userId);
+        console.log("Driver ID sent to user:", userId);
+    } else {
+        console.log(`User with ID ${driverId} is not online.`);
+    }
+};
+
+export const handleCancelRide = (io, socket, userId, driverId) => {
+    const targetUser = onlineUsers.find(user => user.userId === driverId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("cancelledRide", userId);
+        console.log("Driver ID sent to user:", userId);
+    } else {
+        console.log(`User with ID ${driverId} is not online.`);
+    }
+};
+
+
+

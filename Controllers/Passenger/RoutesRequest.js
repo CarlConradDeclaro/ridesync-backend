@@ -13,7 +13,7 @@ const getRouteRequest = async (req, res) => {
 
     const query = `
         SELECT * FROM Routes
-        WHERE userId = ? AND status = 'pending'  
+        WHERE userId = ? AND status = 'pending' 
     `;
 
     try {
@@ -23,9 +23,6 @@ const getRouteRequest = async (req, res) => {
                 return res.status(500).json({ message: "Error fetching routes." });
             }
 
-            if (results.length === 0) {
-                return res.status(404).json({ message: "No routes found for this user." });
-            }
 
             res.json(results); // Return the fetched routes
         });
@@ -35,6 +32,33 @@ const getRouteRequest = async (req, res) => {
     }
 };
 
+const getRequestRide = async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const query = `
+        SELECT * FROM Routes
+        WHERE userId = ? AND status = 'onGoing' 
+    `;
+
+    try {
+        connection.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error fetching routes." });
+            }
+
+
+            res.json(results); // Return the fetched routes
+        });
+    } catch (error) {
+        console.error("Error fetching routes:", error);
+        res.status(500).json({ message: "Server error." });
+    }
+};
 
 
 const RouteRequest = async (req, res) => {
@@ -68,17 +92,35 @@ const RouteRequest = async (req, res) => {
 }
 
 const RouteCancelled = async (req, res) => {
-    const { userId } = req.body;
+    const { userId, yourDriver } = req.body;
 
     try {
         const query = `
             UPDATE Routes
             SET status = 'Cancelled'
-            WHERE  userId = ? AND status = 'pending'
+            WHERE  userId = ? AND status = 'onGoing'  OR status = "pending"
         `
+        const query2 = `
+        UPDATE PotentialDrivers
+        SET status = 'cancelled'
+        WHERE passengerId = ? AND status = "waiting" || status = "matched"
+    `;
+        const query3 = `
+            UPDATE Rides
+            SET rideStatus = 'cancelled'
+            WHERE driverId = ? AND rideStatus = "pending" || rideStatus = "matched"  || rideStatus = "onGoing" 
+        `;
 
         const result = await new Promise((resolve, reject) => {
             connection.query(query, [userId], (err, results) => {
+                if (err) return reject(err)
+                resolve(results)
+            })
+            connection.query(query2, [userId], (err, results) => {
+                if (err) return reject(err)
+                resolve(results)
+            })
+            connection.query(query3, [yourDriver], (err, results) => {
                 if (err) return reject(err)
                 resolve(results)
             })
@@ -98,4 +140,4 @@ const RouteCancelled = async (req, res) => {
 
 
 
-export { RouteRequest, RouteCancelled, getRouteRequest }
+export { RouteRequest, RouteCancelled, getRouteRequest, getRequestRide }
