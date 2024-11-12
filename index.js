@@ -38,6 +38,7 @@ initSocket(io)
 
 const port = process.env.PORT || 5000
 
-server.listen(port, (req, res) => {
+server.listen(port, '0.0.0.0', (req, res) => {
+    console.log("Server running on http://192.168.0.187:5000");
     console.log(`Server running on PORT: ${port}`);
 })

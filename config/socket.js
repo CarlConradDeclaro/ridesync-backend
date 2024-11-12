@@ -41,6 +41,10 @@ export const initSocket = (io) => {
             handleCancelRide(io, socket, userId, driverId)
         })
 
+        // socket.on("approvedOffer",( userInfo.id, driverId)=>{
+
+        // })
+
 
         // Handle disconnect
         socket.on("disconnect", () => {

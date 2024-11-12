@@ -2,8 +2,6 @@ import connection from '../../Database/Connection/Connection.js';
 import { routeSchema } from '../../models/routeSchema.js';
 
 
-
-
 const getRouteRequest = async (req, res) => {
     const { userId } = req.body;
 
@@ -134,10 +132,37 @@ const RouteCancelled = async (req, res) => {
         console.error(error);
         res.status(500).json({ message: 'Server error' })
     }
+}
 
+
+const getCancelledRoutes = async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const query = `
+        SELECT * FROM Routes
+        WHERE userId = ? AND status = 'Cancelled' 
+    `;
+
+    try {
+        connection.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error fetching routes." });
+            }
+
+
+            res.json(results); // Return the fetched routes
+        });
+    } catch (error) {
+        console.error("Error fetching routes:", error);
+        res.status(500).json({ message: "Server error." });
+    }
 }
 
 
 
-
-export { RouteRequest, RouteCancelled, getRouteRequest, getRequestRide }
+export { RouteRequest, RouteCancelled, getRouteRequest, getRequestRide, getCancelledRoutes }

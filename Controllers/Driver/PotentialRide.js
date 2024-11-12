@@ -58,38 +58,35 @@ const Ride = async (req, res) => {
     }
 
 }
-
-
 const getRides = async (req, res) => {
+    const { driverId, status } = req.body;
 
-
-    const { driverId, routeId, } = req.body;
-    console.log("Received data:", req.body)
-
-    const query = `
-        SELECT * FROM RIDES
-        WHERE status = ? 
-    `
-
-    try {
-        const result = await new Promise((resolve, reject) => {
-            connection.query(query, [driverId, routeId], (err, results) => {
-                if (err) return reject(err)
-                resolve(results)
-            })
-        })
-
-        if (result.affectedRows > 0)
-            res.status(200).json({ message: "potential Drivers added successfully", status: true });
-        else
-            res.status(400).json({ message: "Failed to add" });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).send({ message: "Server error" });
+    if (!driverId) {
+        return res.status(400).json({ message: "User ID is required." });
     }
 
+    const query = `
+        SELECT * FROM Rides
+        WHERE driverId = ? AND rideStatus = ?
+    `;
+
+    try {
+        connection.query(query, [driverId, status], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error fetching routes." });
+            }
+
+
+            res.json(results);
+        });
+    } catch (error) {
+        console.error("Error fetching routes:", error);
+        res.status(500).json({ message: "Server error." });
+
+    }
 }
+
 
 
 export { PotentialRide, Ride, getRides }

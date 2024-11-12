@@ -14,5 +14,25 @@ const GetAllRideRequest = (req, res) => {
 }
 
 
+const GetOnGoingRoute = (req, res) => {
 
-export { GetAllRideRequest }
+
+    const { routeId } = req.body;
+
+    const query = `
+    SELECT * FROM Routes WHERE routeId = ? AND status = "onGoing"
+    `
+
+    connection.query(query, [routeId], (err, results) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send({ message: 'error fetching data' })
+        } else {
+            res.json(results)
+        }
+    })
+
+}
+
+
+export { GetAllRideRequest, GetOnGoingRoute }

@@ -74,10 +74,6 @@ const driverSelected = async (req, res) => {
 
 
 
-const cancelledRide = async (req, res) => {
-    // const 
-}
-
 
 const CancelledAllPotentialDrivers = async (req, res) => {
     const { driversIds } = req.body;
@@ -141,5 +137,36 @@ const getRides = async (req, res) => {
 
     }
 }
+
+
+
+// const yawa = async (req, res) => {
+//     const { driverId, status } = req.body;
+
+//     if (!driverId) {
+//         return res.status(400).json({ message: "User ID is required." });
+//     }
+
+//     const query = `
+//         SELECT * FROM Rides
+//         WHERE driverId = ? AND rideStatus = ?
+//     `;
+
+//     try {
+//         connection.query(query, [driverId, status], (err, results) => {
+//             if (err) {
+//                 console.error(err);
+//                 return res.status(500).json({ message: "Error fetching routes." });
+//             }
+
+
+//             res.json(results);
+//         });
+//     } catch (error) {
+//         console.error("Error fetching routes:", error);
+//         res.status(500).json({ message: "Server error." });
+
+//     }
+// }
 
 export { GetAllPotentialRide, CancelledAllPotentialDrivers, driverSelected, getRides }
