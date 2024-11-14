@@ -14,6 +14,7 @@ export const addNewUser = (io, socket, userId, socketId) => {
     io.emit("getOnlineUsers", onlineUsers);
 };
 
+
 export const handleOfferRide = (io, socket, userId, driverId) => {
     const targetUser = onlineUsers.find(user => user.userId === userId);
 
