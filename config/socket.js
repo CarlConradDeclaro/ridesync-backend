@@ -1,4 +1,4 @@
-import { addNewUser, handleAcceptRide, handleCancelRide, handleOfferRide } from "../socket/SocketHandler.js";
+import { addNewUser, handleAcceptRide, handleCancelRide, handleDriverArrived, handleDriverComming, handleOfferRide } from "../socket/SocketHandler.js";
 
 let onlineUsers = [];
 
@@ -41,9 +41,12 @@ export const initSocket = (io) => {
             handleCancelRide(io, socket, userId, driverId)
         })
 
-        // socket.on("approvedOffer",( userInfo.id, driverId)=>{
-
-        // })
+        socket.on("driverIsOtw", (passengerId, latitude, longitude) => {
+            handleDriverComming(io, socket, passengerId, latitude, longitude)
+        })
+        socket.on("driverArrivedAtPickUpLoc", (passengerId) => {
+            handleDriverArrived(io, socket, passengerId)
+        })
 
 
         // Handle disconnect

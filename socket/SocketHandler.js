@@ -48,5 +48,25 @@ export const handleCancelRide = (io, socket, userId, driverId) => {
     }
 };
 
+export const handleDriverComming = (io, socket, userId, latitude, longitude) => {
+    const targetUser = onlineUsers.find(user => user.userId === userId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("driverIsComming", latitude, longitude);
+        console.log("driverIsOnTheWay");
+    } else {
+        console.log(`User with ID ${driverId} is not online.`);
+    }
+};
+export const handleDriverArrived = (io, socket, userId) => {
+    const targetUser = onlineUsers.find(user => user.userId === userId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("driverHasArrived", userId);
+        console.log("driverHasArrived");
+    } else {
+        console.log(`User with ID ${driverId} is not online.`);
+    }
+};
 
 

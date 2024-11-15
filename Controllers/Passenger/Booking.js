@@ -1,3 +1,4 @@
+import { query } from "express";
 import connection from "../../Database/Connection/Connection.js";
 
 const Booking = async (req, res) => {
@@ -6,11 +7,11 @@ const Booking = async (req, res) => {
 
     try {
         const query = `
-            INSERT INTO Routes (userId, startLocation, startLatitude, startLongitude, endLocation, endLatitude, endLongitude, estimatedDuration, distance, totalAmount)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO Routes (userId, startLocation, startLatitude, startLongitude, endLocation, endLatitude, endLongitude, estimatedDuration, distance, totalAmount,status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)
         `;
         const result = await new Promise((resolve, reject) => {
-            connection.query(query, [userId, startLocation, startLatitude, startLongitude, endLocation, endLatitude, endLongitude, estimatedDuration, distance, totalAmount], (err, results) => {
+            connection.query(query, [userId, startLocation, startLatitude, startLongitude, endLocation, endLatitude, endLongitude, estimatedDuration, distance, totalAmount, status], (err, results) => {
                 if (err) return reject(err);
                 resolve(results);
             });
@@ -41,4 +42,39 @@ const Booking = async (req, res) => {
     }
 };
 
-export { Booking };
+const getBookings = async (req, res) => {
+    const { userId } = req.body;
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required." });
+    }
+
+    const query = `
+          SELECT 
+                r.routeId,r.userId,r.startLocation,r.endLocation,r.estimatedDuration,r.distance,
+                r.totalAmount,r.startLatitude,r.startLongitude,r.endLatitude,r.endLongitude,
+                b.driverId,b.trip,b.numPassengers,b.rideType,b.travelDate,d.userFn,d.userLn,
+                d.userEmail,d.userPhone,d.userRating
+          FROM  Routes AS r
+          JOIN  Booking AS b ON r.routeId = b.routeId
+          JOIN Users AS d On d.userId = b.driverId
+          WHERE r.status = 'booking' AND d.userType = 'D';
+        `
+
+    try {
+        connection.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error fetching routes." });
+            }
+
+            res.json(results)
+        })
+    } catch (error) {
+        console.error("Error fetching routes:", error);
+        res.status(500).json({ message: "Server error." });
+    }
+}
+
+
+export { Booking, getBookings };
