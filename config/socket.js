@@ -1,4 +1,4 @@
-import { addNewUser, handleAcceptRide, handleCancelRide, handleDriverArrived, handleDriverComming, handleOfferRide } from "../socket/SocketHandler.js";
+import { addNewUser, handleAcceptRide, handleCancelRide, handleDriverArrived, handleDriverComming, handleMessageSendTo, handleOfferRide, handleTransactionCompleted } from "../socket/SocketHandler.js";
 
 let onlineUsers = [];
 
@@ -46,6 +46,16 @@ export const initSocket = (io) => {
         })
         socket.on("driverArrivedAtPickUpLoc", (passengerId) => {
             handleDriverArrived(io, socket, passengerId)
+        })
+
+        socket.on("transactionCompleted", (passengerId) => {
+            handleTransactionCompleted(io, socket, passengerId)
+        })
+
+        socket.on("sendMessageTo", (userId, message) => {
+            handleMessageSendTo(io, socket, userId, message)
+            socket.emit("message", message)
+            console.log("Message data", userId, message);
         })
 
 
