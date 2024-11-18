@@ -16,7 +16,6 @@ const GetAllRideRequest = (req, res) => {
 
 const GetOnGoingRoute = (req, res) => {
 
-
     const { routeId } = req.body;
 
     const query = `

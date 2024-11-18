@@ -88,5 +88,30 @@ const getRides = async (req, res) => {
 }
 
 
+const fetchIfDriverOfferingRide = async (req, res) => {
+    const { driverId } = req.body
+    if (!driverId) {
+        return res.status(400).json({ message: "User ID is required." });
+    }
+    const query = `
+       SElECT * FROM PotentialDrivers
+       WHERE driverId = ? and status = 'waiting'
+    `
+    try {
+        connection.query(query, [driverId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error fetching routes." });
+            }
+            res.json(results);
+        })
+    } catch (error) {
+        console.error("Error fetching routes:", error);
+        res.status(500).json({ message: "Server error." });
+    }
 
-export { PotentialRide, Ride, getRides }
+}
+
+
+
+export { PotentialRide, Ride, getRides, fetchIfDriverOfferingRide }

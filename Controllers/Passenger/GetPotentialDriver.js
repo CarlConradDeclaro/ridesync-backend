@@ -23,8 +23,8 @@ const driverSelected = async (req, res) => {
 
     const query1 = `
         UPDATE PotentialDrivers
-        SET status = 'matched'
-        WHERE passengerId = ? AND status = "waiting"
+        SET status = 'rejected'
+        WHERE passengerId = ? AND status = "waiting" AND driverId != ?
     `;
 
     const query2 = `
@@ -38,10 +38,16 @@ const driverSelected = async (req, res) => {
         WHERE driverId = ? AND rideStatus = "pending"
         `;
 
+    const query4 = `
+        UPDATE PotentialDrivers
+        SET status = 'matched'
+        WHERE passengerId = ? AND status = "waiting" AND driverId = ?
+    `;
+
     try {
         // Wrap the query in a promise to handle both asynchronously
         const updateQuery1 = new Promise((resolve, reject) => {
-            connection.query(query1, [userId], (err, results) => {
+            connection.query(query1, [userId, driverId], (err, results) => {
                 if (err) reject(err);
                 else resolve(results);
             });
@@ -61,9 +67,16 @@ const driverSelected = async (req, res) => {
             });
         });
 
+        const updateQuery4 = new Promise((resolve, reject) => {
+            connection.query(query4, [userId, driverId], (err, results) => {
+                if (err) reject(err);
+                else resolve(results);
+            });
+        });
+
 
         // Wait for both updates to complete
-        const [result1, result2] = await Promise.all([updateQuery1, updateQuery2, updateQuery3]);
+        const [result1, result2] = await Promise.all([updateQuery1, updateQuery2, updateQuery3, updateQuery4]);
 
         res.json({ message: 'Status updated to onGoing' });
     } catch (err) {
@@ -140,33 +153,5 @@ const getRides = async (req, res) => {
 
 
 
-// const yawa = async (req, res) => {
-//     const { driverId, status } = req.body;
-
-//     if (!driverId) {
-//         return res.status(400).json({ message: "User ID is required." });
-//     }
-
-//     const query = `
-//         SELECT * FROM Rides
-//         WHERE driverId = ? AND rideStatus = ?
-//     `;
-
-//     try {
-//         connection.query(query, [driverId, status], (err, results) => {
-//             if (err) {
-//                 console.error(err);
-//                 return res.status(500).json({ message: "Error fetching routes." });
-//             }
-
-
-//             res.json(results);
-//         });
-//     } catch (error) {
-//         console.error("Error fetching routes:", error);
-//         res.status(500).json({ message: "Server error." });
-
-//     }
-// }
 
 export { GetAllPotentialRide, CancelledAllPotentialDrivers, driverSelected, getRides }

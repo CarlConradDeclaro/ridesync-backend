@@ -55,7 +55,7 @@ export const handleDriverComming = (io, socket, userId, latitude, longitude) => 
         io.to(targetUser.socketId).emit("driverIsComming", latitude, longitude);
         console.log("driverIsOnTheWay");
     } else {
-        console.log(`User with ID ${driverId} is not online.`);
+        console.log(`User with ID ${userId} is not online.`);
     }
 };
 export const handleDriverArrived = (io, socket, userId) => {
@@ -68,5 +68,27 @@ export const handleDriverArrived = (io, socket, userId) => {
         console.log(`User with ID ${driverId} is not online.`);
     }
 };
+
+export const handleTransactionCompleted = (io, socket, userId) => {
+    const targetUser = onlineUsers.find(user => user.userId === userId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("rideIsCompleted", userId);
+    } else {
+        console.log(`User with ID ${userId} is not online.`);
+    }
+};
+
+export const handleMessageSendTo = (io, socket, userId, message) => {
+    const targetUser = onlineUsers.find(user => user.userId === userId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("message", message);
+    } else {
+        console.log(`User with ID ${userId} is not online.`);
+    }
+};
+
+
 
 
