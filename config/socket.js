@@ -52,9 +52,8 @@ export const initSocket = (io) => {
             handleTransactionCompleted(io, socket, passengerId)
         })
 
-        socket.on("sendMessageTo", (userId, message) => {
-            handleMessageSendTo(io, socket, userId, message)
-            socket.emit("message", message)
+        socket.on("sendMessageTo", (userId, message, driverId) => {
+            handleMessageSendTo(io, socket, userId, message, driverId)
             console.log("Message data", userId, message);
         })
 

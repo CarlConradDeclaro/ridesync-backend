@@ -80,11 +80,11 @@ export const handleTransactionCompleted = (io, socket, userId) => {
     }
 };
 
-export const handleMessageSendTo = (io, socket, userId, message) => {
-    const targetUser = onlineUsers.find(user => user.userId === userId);
+export const handleMessageSendTo = (io, socket, userId, message, driverId) => {
+    const targetUser = onlineUsers.find(user => user.userId === driverId);
 
     if (targetUser) {
-        io.to(targetUser.socketId).emit("message", message);
+        io.to(targetUser.socketId).emit("message", userId, message, driverId);
     } else {
         console.log(`User with ID ${userId} is not online.`);
     }

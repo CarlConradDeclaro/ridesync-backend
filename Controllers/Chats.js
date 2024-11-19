@@ -94,14 +94,30 @@ const createChats = async (req, res) => {
 };
 
 const getChats = async (req, res) => {
-    const { userId } = req.body;
-    const query = `
-       SELECT  c.chatId, c.user2_Id,
-		 u.userFn,u.userLn
-        FROM Chats AS c
-        JOIN Users AS u ON u.userId = c.user2_Id
-        WHERE c.user1_Id = ?
+    const { userId, requestFrom } = req.body;
+    const queryPassenger = `
+        SELECT  c.chatId, c.user2_Id,
+            u.userFn,u.userLn
+            FROM Chats AS c
+            JOIN Users AS u ON u.userId = c.user2_Id
+            WHERE c.user1_Id = ?
     `
+
+    const queryDriver = `
+        SELECT  c.chatId, c.user1_Id,
+                u.userFn,u.userLn
+        FROM Chats AS c
+        JOIN Users AS u ON u.userId = c.user1_Id
+        WHERE c.user2_Id = ?
+        `
+    let query;
+
+    if (requestFrom == 'passenger') {
+        query = queryPassenger;
+    } else if (requestFrom == 'driver') {
+        query = queryDriver
+    }
+
     try {
         const results = await new Promise((resolve, reject) => {
             connection.query(query, [userId], (err, results) => {
@@ -117,8 +133,6 @@ const getChats = async (req, res) => {
         console.error("Error fetching driver:", error);
         res.status(500).json({ message: "Server error.", error });
     }
-
-
 }
 
 
