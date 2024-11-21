@@ -53,13 +53,14 @@ const getBookings = async (req, res) => {
           SELECT 
                 r.routeId,r.userId,r.startLocation,r.endLocation,r.estimatedDuration,r.distance,
                 r.totalAmount,r.startLatitude,r.startLongitude,r.endLatitude,r.endLongitude,
-                b.driverId,b.trip,b.numPassengers,b.rideType,b.travelDate,d.userFn,d.userLn,
-                d.userEmail,d.userPhone,d.userRating
+                b.driverId,b.trip,b.numPassengers,b.rideType,b.travelDate,u.userFn,u.userLn,
+                u.userEmail,u.userPhone,u.userRating
           FROM  Routes AS r
           JOIN  Booking AS b ON r.routeId = b.routeId
-          JOIN Users AS d On d.userId = b.driverId
-          WHERE r.status = 'booking' AND d.userType = 'D';
+          JOIN Users AS u On u.userId = b.userId
+          WHERE r.status = 'booking' AND u.userType = 'P' AND u.userId = ?
         `
+
 
     try {
         connection.query(query, [userId], (err, results) => {

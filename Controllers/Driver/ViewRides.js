@@ -43,14 +43,15 @@ const getBookingRides = async (req, res) => {
         return res.status(400).json({ message: "User ID is required." });
     }
     const query = `
-         SELECT r.routeId,r.userId, r.startLocation, r.endLocation, r.estimatedDuration,r.distance,r.totalAmount,
-                r.startLatitude,r.startLongitude,r.endLatitude,r.endLongitude,b.driverId,b.trip, b.numPassengers,
-                b.rideType,b.travelDate,u.userFn, u.userLn,u.userRating, u.userEmail
-                FROM Booking AS b 
-                JOIN  Routes AS r  ON r.routeId = b.routeId
-                JOIN Users AS u on r.userId = u.userId
-                WHERE 
-                r.status = 'booking' AND b.driverId = 12;
+          SELECT 
+                r.routeId,r.userId,r.startLocation,r.endLocation,r.estimatedDuration,r.distance,
+                r.totalAmount,r.startLatitude,r.startLongitude,r.endLatitude,r.endLongitude,
+                b.driverId,b.trip,b.numPassengers,b.rideType,b.travelDate,u.userFn,u.userLn,
+                u.userEmail,u.userPhone,u.userRating
+          FROM  Routes AS r
+          JOIN  Booking AS b ON r.routeId = b.routeId	
+          JOIN Users AS u On u.userId = b.driverId
+          WHERE r.status = 'booking' AND u.userType = 'D' AND u.userId = ?
                  `
 
     try {

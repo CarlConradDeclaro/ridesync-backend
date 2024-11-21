@@ -3,7 +3,11 @@ import validator from 'validator';
 import jwt from 'jsonwebtoken';
 import connection from '../Database/Connection/Connection.js';
 import { checkEmailExists, registerUserQuery, getUserByEmail } from '../Database/UserQuries/userQuries.js'; // Add .js
+import { OAuth2Client } from 'google-auth-library';
 
+const client = new OAuth2Client("62174630498-98j6kmqjt4q2ipgcdi0nbcj13r8daq3s.apps.googleusercontent.com");
+
+//62174630498-98j6kmqjt4q2ipgcdi0nbcj13r8daq3s.apps.googleusercontent.com
 const createToken = (id) => {
     const jwtkey = process.env.JWT_SECRET_KEY;
     return jwt.sign({ id }, jwtkey, { expiresIn: "1d" });
@@ -80,6 +84,38 @@ const logInUser = async (req, res) => {
     }
 }
 
+const googleLogin = async (req, res) => {
+    const { token } = req.body;
+
+    try {
+        // Verify the Google token
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: "62174630498-98j6kmqjt4q2ipgcdi0nbcj13r8daq3s.apps.googleusercontent.com",
+        });
+        const payload = ticket.getPayload();
+        const { email, name } = payload;
+
+        let user = await getUserByEmail(email);
+
+        // Generate JWT token for the user
+        const jwtToken = createToken(user.userId);
+
+        // Send response with user details and token
+        res.status(200).send({
+            user: {
+                id: user.userId,
+                userEmail: user.userEmail,
+                userType: user.userType,
+            },
+            token: jwtToken,
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Email is not registered", error: error.message });
+    }
+};
+
+
 const getUsers = (req, res) => {
     connection.query('SELECT * FROM USERS', (err, results) => {
         if (err) {
@@ -93,4 +129,4 @@ const getUsers = (req, res) => {
     });
 }
 
-export { registerUser, getUsers, logInUser };
+export { registerUser, getUsers, logInUser, googleLogin };
