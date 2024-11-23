@@ -16,7 +16,7 @@ const PotentialRide = async (req, res) => {
             })
         })
         if (result.affectedRows > 0)
-            res.status(200).json({ message: "potential Drivers added successfully", status: true });
+            res.status(200).json({ status:true});
         else
             res.status(400).json({ message: "Failed to add" });
 

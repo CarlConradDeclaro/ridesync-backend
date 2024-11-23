@@ -11,8 +11,9 @@ const createToken = (id) => {
 
 const driverRegisterUser = async (req, res) => {
     try {
-        const { userLn, userFn, userEmail, userPhone, userPassword, userType, userRating, gender, country } = req.body;
-
+        const { userLn, userFn, userEmail, userPhone, userPassword, userType, userRating, gender, country, demoStat,
+            carType, manufacturerName, modelName, modelYear, vehiclePlateNo, vehicleSets, vehicleColor, typeRide
+         } = req.body;
         const emailExists = await checkEmailExists(userEmail);
         if (emailExists) {
             return res.status(400).send({ message: "Email is already in use" });
@@ -33,6 +34,14 @@ const driverRegisterUser = async (req, res) => {
             userRating,
             gender,
             country,
+            carType, 
+            manufacturerName,
+             modelName, 
+             modelYear,
+             vehiclePlateNo, 
+            vehicleSets, 
+            vehicleColor, 
+            typeRide
         });
 
         res.status(201).send({ message: "User registered successfully!" });
@@ -68,7 +77,8 @@ const driverLogin = async (req, res) => {
             user: {
                 id: user.userId,
                 userEmail: user.userEmail,
-                userType: user.userType
+                userType: user.userType,
+                typeRide:user.typeRide
             },
             token,
 
@@ -78,6 +88,36 @@ const driverLogin = async (req, res) => {
         res.status(500).send({ message: "Server error" });
     }
 }
+
+
+const driverRole = (req, res) => {
+    try {
+        const { userId } = req.body;
+
+        // SQL query to get the driver role and vehicle info
+        const query = `
+            SELECT u.userId, u.userType, dr.typeRide
+            FROM Users as u
+            JOIN Vehicle as dr ON u.userId = dr.userId
+            WHERE u.userId = ?
+        `;
+
+        connection.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error(err);
+                return res.status(500).json({ message: "Error fetching routes." });
+            }
+
+            // Return the results
+            res.json(results);
+        });
+    } catch (error) {
+        console.error("Error fetching routes:", error);
+        res.status(500).json({ message: "Server error." });
+    }
+};
+
+
 
 const getUsers = (req, res) => {
     connection.query('SELECT * FROM USERS', (err, results) => {
@@ -92,4 +132,4 @@ const getUsers = (req, res) => {
     });
 }
 
-export { driverRegisterUser, driverLogin };
+export { driverRegisterUser, driverLogin,driverRole };

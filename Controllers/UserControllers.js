@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import validator from 'validator';
 import jwt from 'jsonwebtoken';
 import connection from '../Database/Connection/Connection.js';
-import { checkEmailExists, registerUserQuery, getUserByEmail } from '../Database/UserQuries/userQuries.js'; // Add .js
+import { checkEmailExists, registerUserQuery, getUserByEmail, registerPassengerQuery } from '../Database/UserQuries/userQuries.js'; // Add .js
 import { OAuth2Client } from 'google-auth-library';
 
 const client = new OAuth2Client("62174630498-98j6kmqjt4q2ipgcdi0nbcj13r8daq3s.apps.googleusercontent.com");
@@ -27,7 +27,7 @@ const registerUser = async (req, res) => {
         const hashedPassword = await bcrypt.hash(userPassword, salt)
 
         // Insert the new user
-        await registerUserQuery({
+        await registerPassengerQuery({
             userLn,
             userFn,
             userEmail,
