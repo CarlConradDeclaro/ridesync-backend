@@ -1,6 +1,7 @@
 let onlineUsers = [];
 
 
+
 export const addNewUser = (io, socket, userId, socketId) => {
     const userIndex = onlineUsers.findIndex(user => user.userId === userId);
 
