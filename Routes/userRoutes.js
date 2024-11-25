@@ -6,6 +6,7 @@ import { Location } from '../Controllers/Passenger/Map.js'
 import { CancelledAllPotentialDrivers, driverSelected, GetAllPotentialRide, getRides } from '../Controllers/Passenger/GetPotentialDriver.js';
 import { Booking, getBookings } from '../Controllers/Passenger/Booking.js';
 import { createChats, getChats, getDriver, getMessages, sendMessage } from '../Controllers/Chats.js';
+import { CarpoolPassenger, fetchAllCarpoolRide, isBookedAlready } from '../Controllers/Carpool/CarpoolRides.js';
 
 
 
@@ -33,7 +34,9 @@ router.post("/createChat", createChats)
 router.post("/sendMessage", sendMessage)
 router.post("/getMessages", getMessages)
 router.post("/google-login", googleLogin)
-
+router.get('/fetchAllCarpoolRides',fetchAllCarpoolRide)
+router.post('/CarpoolPassenger',CarpoolPassenger)
+router.post('/isBookedAlready',isBookedAlready)
 
 
 router.put("/routeCancelled", RouteCancelled)

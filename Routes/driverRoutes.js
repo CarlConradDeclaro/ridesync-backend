@@ -3,7 +3,7 @@ import { GetAllRideRequest, GetOnGoingRoute } from '../Controllers/Driver/GetAll
 import { fetchIfDriverOfferingRide, getRides, PotentialRide, Ride } from '../Controllers/Driver/PotentialRide.js'
 import { driverLogin, driverRegisterUser, driverRole } from '../Controllers/Driver/DriverController.js'
 import { getBookingRides, getRecentRides } from '../Controllers/Driver/ViewRides.js'
-import { createCarpoolRide, fetchCarpoolRide } from '../Controllers/Carpool/CarpoolRides.js'
+import { createCarpoolRide, fetchCarpoolRide, fetchPassengers } from '../Controllers/Carpool/CarpoolRides.js'
 const router = express.Router()
 
 
@@ -20,5 +20,6 @@ router.post('/bookingRides', getBookingRides)
 router.post('/driverRole',driverRole)
 router.post('/createCarpoolRide',createCarpoolRide)
 router.post('/fetchCarpoolRides',fetchCarpoolRide)
+router.post('/fetchPassengers',fetchPassengers)
 
 export default router;
