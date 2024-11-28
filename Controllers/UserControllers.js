@@ -7,7 +7,7 @@ import { OAuth2Client } from 'google-auth-library';
 
 const client = new OAuth2Client("62174630498-98j6kmqjt4q2ipgcdi0nbcj13r8daq3s.apps.googleusercontent.com");
 
-//62174630498-98j6kmqjt4q2ipgcdi0nbcj13r8daq3s.apps.googleusercontent.com
+
 const createToken = (id) => {
     const jwtkey = process.env.JWT_SECRET_KEY;
     return jwt.sign({ id }, jwtkey, { expiresIn: "1d" });
