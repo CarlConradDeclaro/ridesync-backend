@@ -2,7 +2,7 @@ import express from 'express'
 import { GetAllRideRequest, GetOnGoingRoute } from '../Controllers/Driver/GetAllRideRequest.js'
 import { fetchIfDriverOfferingRide, getRides, PotentialRide, Ride } from '../Controllers/Driver/PotentialRide.js'
 import { driverLogin, driverRegisterUser, driverRole } from '../Controllers/Driver/DriverController.js'
-import { getBookingRides, getRecentRides } from '../Controllers/Driver/ViewRides.js'
+import { getBookingRides, getCancelledRides, getRecentRides } from '../Controllers/Driver/ViewRides.js'
 import { createCarpoolRide, fetchCarpoolRide, fetchPassengers } from '../Controllers/Carpool/CarpoolRides.js'
 const router = express.Router()
 
@@ -21,5 +21,7 @@ router.post('/driverRole',driverRole)
 router.post('/createCarpoolRide',createCarpoolRide)
 router.post('/fetchCarpoolRides',fetchCarpoolRide)
 router.post('/fetchPassengers',fetchPassengers)
+router.post('/fetchCancelledRides',getCancelledRides)
+
 
 export default router;

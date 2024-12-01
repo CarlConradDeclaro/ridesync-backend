@@ -85,7 +85,7 @@ const createChats = async (req, res) => {
         if (results.affectedRows > 0) {
             res.status(201).json({ message: "Chat created successfully", status: true }); // Created response
         } else {
-            res.status(400).json({ message: "Failed to create chat" });
+            res.status(201).json({ message: "Failed to create chat", status: false });
         }
     } catch (error) {
         console.error("Error:", error);
@@ -191,5 +191,11 @@ const getMessages = async (req, res) => {
         res.status(500).json({ message: "Server error", error });
     }
 }
+
+
+const checkChatExist = async(req,res)=>{
+    
+}
+
 
 export { getDriver, createChats, getChats, sendMessage, getMessages }

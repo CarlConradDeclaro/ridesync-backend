@@ -91,6 +91,38 @@ export const handleMessageSendTo = (io, socket, userId, message, driverId) => {
     }
 };
 
+export const handelCarpoolingBooking =(io,routeId,passengerId,driverId,numberOfPassengers) =>{
+    const targetUser = onlineUsers.find(user => user.userId === driverId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("getPassengerBooking", routeId, passengerId, numberOfPassengers);
+    } else {
+        console.log(`User with ID ${driverId} is not online.`);
+    }
+}
+
+export const handleRefreshRides =(io,passengerId,routeId) =>{
+    const targetUser = onlineUsers.find(user => user.userId === passengerId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("refreshRides",routeId);
+    } else {
+        console.log(`User with ID ${driverId} is not online.`);
+    }
+}
+
+export const handleRefresh =(io,driverId,routeId) =>{
+    const targetUser = onlineUsers.find(user => user.userId === driverId);
+
+    if (targetUser) {
+        io.to(targetUser.socketId).emit("refreshMyRides",routeId);
+    } else {
+        console.log(`User with ID ${driverId} is not online.`);
+    }
+}
+
+
+
 
 
 

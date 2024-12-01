@@ -4,9 +4,9 @@ import { registerUser, getUsers, logInUser, googleLogin } from '../Controllers/U
 import { getCancelledRoutes, getRecentRide, getRequestRide, getRouteRequest, RouteCancelled, RouteRequest, updateRoutesToCompleted } from '../Controllers/Passenger/RoutesRequest.js'
 import { Location } from '../Controllers/Passenger/Map.js'
 import { CancelledAllPotentialDrivers, driverSelected, GetAllPotentialRide, getRides } from '../Controllers/Passenger/GetPotentialDriver.js';
-import { Booking, getBookings } from '../Controllers/Passenger/Booking.js';
+import { Booking, cancelBooking, getBookings, markBookingAsDone } from '../Controllers/Passenger/Booking.js';
 import { createChats, getChats, getDriver, getMessages, sendMessage } from '../Controllers/Chats.js';
-import { CarpoolPassenger, fetchAllCarpoolRide, isBookedAlready } from '../Controllers/Carpool/CarpoolRides.js';
+import { CarpoolPassenger, fetchAllCarpoolRide, fetchBookedCarpools, isBookedAlready, isCarpoolBooked } from '../Controllers/Carpool/CarpoolRides.js';
 
 
 
@@ -37,8 +37,10 @@ router.post("/google-login", googleLogin)
 router.get('/fetchAllCarpoolRides',fetchAllCarpoolRide)
 router.post('/CarpoolPassenger',CarpoolPassenger)
 router.post('/isBookedAlready',isBookedAlready)
-
-
+router.post('/isCarpoolBooked',isCarpoolBooked)
+router.post('/fetchBookedCarpools',fetchBookedCarpools)
+router.post('/cancelBooking',cancelBooking)
+router.post('/markBookingAsDone',markBookingAsDone)
 router.put("/routeCancelled", RouteCancelled)
 
 

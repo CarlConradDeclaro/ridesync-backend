@@ -50,15 +50,17 @@ const getBookings = async (req, res) => {
     }
 
     const query = `
-          SELECT 
-                r.routeId,r.userId,r.startLocation,r.endLocation,r.estimatedDuration,r.distance,
-                r.totalAmount,r.startLatitude,r.startLongitude,r.endLatitude,r.endLongitude,
-                b.driverId,b.trip,b.numPassengers,b.rideType,b.travelDate,u.userFn,u.userLn,
-                u.userEmail,u.userPhone,u.userRating
-          FROM  Routes AS r
-          JOIN  Booking AS b ON r.routeId = b.routeId
-          JOIN Users AS u On u.userId = b.userId
-          WHERE r.status = 'booking' AND u.userType = 'P' AND u.userId = ?
+           SELECT  r.routeId, r.userId,r.startLocation, r.endLocation, r.estimatedDuration,
+            r.distance, r.totalAmount, r.startLatitude,r.startLongitude, r.endLatitude,
+            r.endLongitude, b.driverId, b.trip,b.numPassengers,b.rideType,b.travelDate,
+            d.userId as 'driverId',d.userFn, d.userLn, d.userEmail , d.userPhone,d.userRating 
+            FROM Routes AS r
+            JOIN Booking AS b ON r.routeId = b.routeId
+            JOIN Users AS p ON p.userId = b.userId
+            JOIN Users AS d ON d.userId = b.driverId
+            WHERE b.status = 'booking'
+            AND p.userType = 'P' 
+            AND p.userId = ?;   
         `
 
 
@@ -77,5 +79,92 @@ const getBookings = async (req, res) => {
     }
 }
 
+const cancelBooking = async (req, res) => {
+    const { routeId } = req.body;
 
-export { Booking, getBookings };
+    if (!routeId) {
+        return res.status(400).json({ message: 'Route ID is required' });
+    }
+
+    try {
+        // First update the Booking table
+        const result1 = await new Promise((resolve, reject) => {
+            connection.query(
+                `UPDATE Booking SET status = 'cancelled' WHERE routeId = ?`,
+                [routeId],
+                (err, results) => {
+                    if (err) return reject(err);
+                    resolve(results);
+                }
+            );
+        });
+
+        // Then update the Routes table
+        const result2 = await new Promise((resolve, reject) => {
+            connection.query(
+                `UPDATE Routes SET status = 'Cancelled' WHERE routeId = ?`,
+                [routeId],
+                (err, results) => {
+                    if (err) return reject(err);
+                    resolve(results);
+                }
+            );
+        });
+
+        if (result1.affectedRows > 0 && result2.affectedRows > 0) {
+            return res.status(200).json({ message: 'Route and booking updated successfully' });
+        } else {
+            return res.status(400).json({ message: 'Failed to update' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+};
+
+const markBookingAsDone = async(req,res)=>{
+    const { routeId } = req.body;
+
+    if (!routeId) {
+        return res.status(400).json({ message: 'Route ID is required' });
+    }
+
+    try {
+        // First update the Booking table
+        const result1 = await new Promise((resolve, reject) => {
+            connection.query(
+                `UPDATE Booking SET status = 'Completed' WHERE routeId = ?`,
+                [routeId],
+                (err, results) => {
+                    if (err) return reject(err);
+                    resolve(results);
+                }
+            );
+        });
+
+        // Then update the Routes table
+        const result2 = await new Promise((resolve, reject) => {
+            connection.query(
+                `UPDATE Routes SET status = 'Completed' WHERE routeId = ?`,
+                [routeId],
+                (err, results) => {
+                    if (err) return reject(err);
+                    resolve(results);
+                }
+            );
+        });
+
+        if (result1.affectedRows > 0 && result2.affectedRows > 0) {
+            return res.status(200).json({ message: 'Route and booking updated successfully' });
+        } else {
+            return res.status(400).json({ message: 'Failed to update' });
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: 'Server error' });
+    }
+
+}
+
+
+export { Booking, getBookings,cancelBooking,markBookingAsDone};

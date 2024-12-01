@@ -1,4 +1,4 @@
-import { addNewUser, handleAcceptRide, handleCancelRide, handleDriverArrived, handleDriverComming, handleMessageSendTo, handleOfferRide, handleTransactionCompleted } from "../socket/SocketHandler.js";
+import { addNewUser, handelCarpoolingBooking, handleAcceptRide, handleCancelRide, handleDriverArrived, handleDriverComming, handleMessageSendTo, handleOfferRide, handleRefresh, handleRefreshRides, handleTransactionCompleted } from "../socket/SocketHandler.js";
 
 let onlineUsers = [];
 
@@ -54,9 +54,18 @@ export const initSocket = (io) => {
 
         socket.on("sendMessageTo", (userId, message, driverId) => {
             handleMessageSendTo(io, socket, userId, message, driverId)
-            console.log("Message data", userId, message);
         })
 
+        socket.on("carpoolBooking",(routeId,passengerId,driverId,numberOfPassengers)=>{
+            handelCarpoolingBooking(io,routeId,passengerId,driverId,numberOfPassengers)
+        })
+
+        socket.on("refreshViewRides",(userId,routeId)=>{
+            handleRefreshRides(io,userId,routeId)
+        })
+        socket.on("refresh",(userId,routeId)=>{
+            handleRefresh(io,userId,routeId)
+        })
 
         // Handle disconnect
         socket.on("disconnect", () => {

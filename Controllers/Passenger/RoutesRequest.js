@@ -65,19 +65,105 @@ const getRecentRide = async (req, res) => {
         return res.status(400).json({ message: "User ID is required." });
     }
 
-    const query = `
-       SELECT  r.routeId,r.userId, r.startLocation,r.endLocation, r.estimatedDuration, r.distance, r.totalAmount,
-        r.startLatitude, r.startLongitude,r.endLatitude,r.endLongitude,r.status,
-        u.userFn,u.userLn,u.userRating,u.userEmail,u.userPhone
-        FROM 
-            Rides AS rd
-        INNER JOIN 
-            Routes AS r ON rd.routeId = r.routeId
-        INNER JOIN
-            Users AS u  On u.userId = r.userId   
-        WHERE 
-            r.status != 'booking' AND r.status != 'Cancelled' and rd.routeId = r.routeId AND r.userId = ?;
-                `;
+    // const query = `
+    //    SELECT  r.routeId,r.userId, r.startLocation,r.endLocation, r.estimatedDuration, r.distance, r.totalAmount,
+    //     r.startLatitude, r.startLongitude,r.endLatitude,r.endLongitude,r.status,
+    //       d.userFn,d.userLn,d.userRating,d.userEmail,d.userPhone,v.vehiclePlateNo,v.vehicleColor
+    //     FROM 
+    //         Rides AS rd
+    //     INNER JOIN 
+    //         Routes AS r ON rd.routeId = r.routeId
+    //     INNER JOIN
+    //         Users AS u  On u.userId = r.userId 
+    //     JOIN Users AS d ON d.userId = rd.driverId  
+    //     JOIN Vehicle AS v ON v.userId = rd.driverId
+    //     WHERE 
+    //         r.status != 'booking' AND r.status != 'Cancelled' and rd.routeId = r.routeId AND r.userId = ?;
+    //             `;
+//     const query  =`
+//     SELECT  
+//     r.routeId,
+//     r.userId,
+//     r.startLocation,
+//     r.endLocation,
+//     r.estimatedDuration,
+//     r.distance,
+//     r.totalAmount,
+//     r.startLatitude,
+//     r.startLongitude,
+//     r.endLatitude,
+//     r.endLongitude,
+//     r.status,
+//     d.userFn,
+//     d.userLn,
+//     d.userRating,
+//     d.userEmail,
+//     d.userPhone,
+//     v.vehiclePlateNo,
+//     v.vehicleColor,
+//     b.routeId AS bookingRouteId  -- Add booking route ID to get routes from Booking table
+// FROM 
+//     Routes AS r
+// INNER JOIN 
+//     Users AS u ON u.userId = r.userId  -- User who created the route
+// LEFT JOIN 
+//     Rides AS rd ON rd.routeId = r.routeId  -- Include rides for the route
+// LEFT JOIN 
+//     Users AS d ON d.userId = rd.driverId  -- Driver info for the ride
+// LEFT JOIN 
+//     Vehicle AS v ON v.userId = rd.driverId  -- Vehicle info for the ride
+// LEFT JOIN 
+//     Booking AS b ON b.routeId = r.routeId  -- Include routes based on booking
+// WHERE 
+//     r.status != 'booking' AND r.status != 'Cancelled'
+//     AND r.userId = ?;  -- Get routes for the passenger (user with ID 30)
+
+//     `
+    const  query =` 
+    
+ SELECT  
+    r.routeId,
+    r.userId,
+    r.startLocation,
+    r.endLocation,
+    r.estimatedDuration,
+    r.distance,
+    r.totalAmount,
+    r.startLatitude,
+    r.startLongitude,
+    r.endLatitude,
+    r.endLongitude,
+    r.status,
+    COALESCE(d.userFn, dd.userFn, 'No Driver') AS userFn,  -- Use dd if d is null
+    COALESCE(d.userLn, dd.userLn, 'No Last Name') AS userLn,  -- Use dd if d is null
+    COALESCE(d.userRating, dd.userRating, 0) AS userRating,  -- Use dd if d is null
+    COALESCE(d.userEmail, dd.userEmail, 'No Email') AS userEmail,  -- Use dd if d is null
+    COALESCE(d.userPhone, dd.userPhone, 'No Phone') AS userPhone,  -- Use dd if d is null
+    COALESCE(v.vehiclePlateNo, vv.vehiclePlateNo, 'No Plate') AS vehiclePlateNo,  -- Use vv if v is null
+    COALESCE(v.vehicleColor, vv.vehicleColor, 'No Color') AS vehicleColor,  -- Use vv if v is null
+    b.routeId AS bookingRouteId  -- Add booking route ID to get routes from Booking table
+FROM 
+    Routes AS r
+LEFT JOIN 
+    Booking AS b ON b.routeId = r.routeId  -- Include routes based on booking
+INNER JOIN 
+    Users AS u ON u.userId = r.userId  -- User who created the route
+LEFT JOIN 
+    Rides AS rd ON rd.routeId = r.routeId  -- Include rides for the route
+LEFT JOIN 
+    Users AS d ON d.userId = rd.driverId  
+LEFT JOIN 
+    Users AS dd ON dd.userId = b.driverId    
+LEFT JOIN 
+    Vehicle AS v ON v.userId = rd.driverId  -- Vehicle info for the driver in the ride
+LEFT JOIN 
+    Vehicle AS vv ON vv.userId = b.driverId  -- Vehicle info for the driver in the booking
+WHERE 
+    r.status != 'booking' AND r.status != 'Cancelled'
+    AND r.userId = ?;  -- Get routes for the passenger (user with ID 30)
+
+
+    `
 
     try {
         connection.query(query, [userId], (err, results) => {

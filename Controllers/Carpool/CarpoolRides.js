@@ -82,7 +82,30 @@ FROM CarpoolRoutes c;
 
 const fetchAllCarpoolRide = async(req,res)=>{
     const query =`
-      SELECT * FROM CarpoolRoutes 
+        SELECT 
+        c.routeId,
+        c.userId ,
+        c.startLocation,
+        c.endLocation,
+        c.duration,
+        c.distance,
+        c.startLatitude,
+        c.startLongitude,
+        c.endLatitude,
+        c.endLongitude,
+        c.travelDateTime,
+        c.NumSets,
+        c.vehicle,
+        c.pricePerPerson,
+        c.paymentMethod,
+        c.status,
+        c.totalAmount,
+        (
+            SELECT IFNULL(SUM(p.numPassengersBooked), 0)
+            FROM CarpoolPassengers p
+            WHERE p.driverId = c.userId AND p.carpoolRouteId = c.routeId
+        ) AS totalPassengersBooked
+        FROM CarpoolRoutes c;
     `
     try {
         const result = await new Promise((resolve,reject)=>{
@@ -102,38 +125,63 @@ const fetchAllCarpoolRide = async(req,res)=>{
     }
 }
 
-const countPassengers = async(req,res)=>{
-    
-}
-
-
-
-const CarpoolPassenger = async(req,res)=>{
-    const {passengerId,carpoolRouteId,driverId,numPassengersBooked}= req.body;
-
+const isCarpoolBooked = async(req,res)=>{
+    const {routeId,userId}= req.body
     const query = `
-        INSERT INTO CarpoolPassengers (passengerId,carpoolRouteId,driverId,numPassengersBooked)
-        VALUES (?,?,?,?)
+        SELECT *  FROM CarpoolPassengers
     `
+
     try {
         const result = await new Promise((resolve,reject)=>{
-            connection.query(query,[passengerId,carpoolRouteId,driverId,numPassengersBooked],(err,results)=>{
+            connection.query(query,[routeId,userId],(err,results)=>{
                 if(err)return reject(err)
-                resolve(results)
+                resolve(results)    
             })
         })
-
-        if(result.affectedRows>0){
+        if(result.length > 0){
             res.status(200).json(result)
         }else{
-            res.status(400).json({message:"Failed to add"})
+            res.status(200).send({status:false})
         }
     } catch (error) {
         console.error(error);
         res.status(500).send({ message: "Server error" });
     }
+
 }
 
+const CarpoolPassenger = async (req, res) => {
+    const { passengerId, carpoolRouteId, driverId, numPassengersBooked } = req.body;
+
+    // Query to insert into CarpoolPassengers
+    const query = `
+        INSERT INTO CarpoolPassengers (passengerId, carpoolRouteId, driverId, numPassengersBooked)
+        VALUES (?, ?, ?, ?)
+    `;
+
+    try {
+        // Insert into CarpoolPassengers
+        const result = await new Promise((resolve, reject) => {
+            connection.query(query, [passengerId, carpoolRouteId, driverId, numPassengersBooked], (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
+            });
+        });
+
+        // Check if the insert was successful
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: "Booking successful", result });
+        } else {
+            res.status(400).json({ message: "Failed to add booking" });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+};
+
+ 
+ 
 const isBookedAlready = async(req,res)=>{
     const {userId} = req.body;
 
@@ -192,11 +240,38 @@ const fetchPassengers= async(req,res)=>{
 }
 
 
-
+const fetchBookedCarpools = async(req,res)=>{
+    const {userId} = req.body;
+    
+    const query =`
+    SELECT * 
+    FROM CarpoolPassengers as cp
+    JOIN CarpoolRoutes as c ON c.routeId =   cp.carpoolRouteId
+    JOIN Users as u ON u.userId = cp.driverId
+    JOIN Vehicle as v ON v.userId = u.userId
+    WHERE passengerId  = ?;
+    `
+    try {
+         const result = await new Promise((resolve,reject)=>{
+            connection.query(query,[userId],(err,results)=>{
+                if(err) return reject(err)
+                resolve(results)                    
+            })
+         })
+         if(result.length > 0){
+            res.status(200).send(result)
+        }else{
+            res.send({message:"failed to fetch carpool passengers"})
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Server error" });
+    }
+}
 
 
 
 
 export{createCarpoolRide,fetchCarpoolRide,fetchAllCarpoolRide,CarpoolPassenger,isBookedAlready,
-    fetchPassengers
+    fetchPassengers,isCarpoolBooked,fetchBookedCarpools
 }
