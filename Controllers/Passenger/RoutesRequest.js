@@ -134,6 +134,7 @@ const getRecentRide = async (req, res) => {
     r.endLatitude,
     r.endLongitude,
     r.status,
+    COALESCE(b.driverId,rd.driverId, 'No UserId') AS driverId,
     COALESCE(d.userFn, dd.userFn, 'No Driver') AS userFn,  -- Use dd if d is null
     COALESCE(d.userLn, dd.userLn, 'No Last Name') AS userLn,  -- Use dd if d is null
     COALESCE(d.userRating, dd.userRating, 0) AS userRating,  -- Use dd if d is null
@@ -141,6 +142,7 @@ const getRecentRide = async (req, res) => {
     COALESCE(d.userPhone, dd.userPhone, 'No Phone') AS userPhone,  -- Use dd if d is null
     COALESCE(v.vehiclePlateNo, vv.vehiclePlateNo, 'No Plate') AS vehiclePlateNo,  -- Use vv if v is null
     COALESCE(v.vehicleColor, vv.vehicleColor, 'No Color') AS vehicleColor,  -- Use vv if v is null
+    
     b.routeId AS bookingRouteId  -- Add booking route ID to get routes from Booking table
 FROM 
     Routes AS r
@@ -229,7 +231,7 @@ const RouteCancelled = async (req, res) => {
         const query3 = `
             UPDATE Rides
             SET rideStatus = 'cancelled'
-            WHERE driverId = ? AND rideStatus = "pending" || rideStatus = "matched"  || rideStatus = "onGoing" 
+            WHERE   rideStatus = "pending" || rideStatus = "matched"  || rideStatus = "onGoing" 
         `;
 
         const result = await new Promise((resolve, reject) => {
@@ -241,7 +243,7 @@ const RouteCancelled = async (req, res) => {
                 if (err) return reject(err)
                 resolve(results)
             })
-            connection.query(query3, [yourDriver], (err, results) => {
+            connection.query(query3, (err, results) => {
                 if (err) return reject(err)
                 resolve(results)
             })
@@ -352,6 +354,44 @@ const updateRoutesToCompleted = async (req, res) => {
 };
 
 
+const rateUser = (req, res) => {
+    const { user_id, rating } = req.body;
 
+    if (!user_id || !rating) {
+        return res.status(400).json({ error: 'user_id and rating are required.' });
+    }
 
-export { RouteRequest, RouteCancelled, getRouteRequest, getRequestRide, getCancelledRoutes, updateRoutesToCompleted, getRecentRide }
+    const insertRatingQuery = `INSERT INTO Ratings (user_id, rating) VALUES (?, ?)`;
+    connection.query(insertRatingQuery, [user_id, rating], (err, result) => {
+        if (err) {
+            console.error('Error inserting rating:', err);
+            return res.status(500).json({ error: 'Failed to add rating.' });
+        }
+
+        const updateUserRatingQuery = `
+            UPDATE Users u
+            JOIN (
+                SELECT 
+                    user_id,
+                    ROUND(AVG(CAST(rating AS DECIMAL(10, 2))), 2) AS average_rating
+                FROM 
+                    Ratings
+                GROUP BY 
+                    user_id
+            ) r ON u.userId = r.user_id
+            SET u.userRating = r.average_rating;
+        `;
+
+        connection.query(updateUserRatingQuery, (err, result) => {
+            if (err) {
+                console.error('Error updating user rating:', err);
+                return res.status(500).json({ error: 'Failed to update user rating.' });
+            }
+
+            return res.status(200).json({ message: 'Rating added and user rating updated successfully.' });
+        });
+    });
+};
+ 
+
+export { rateUser,RouteRequest, RouteCancelled, getRouteRequest, getRequestRide, getCancelledRoutes, updateRoutesToCompleted, getRecentRide }

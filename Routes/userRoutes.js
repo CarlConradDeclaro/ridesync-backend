@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { registerUser, getUsers, logInUser, googleLogin } from '../Controllers/UserControllers.js';
-import { getCancelledRoutes, getRecentRide, getRequestRide, getRouteRequest, RouteCancelled, RouteRequest, updateRoutesToCompleted } from '../Controllers/Passenger/RoutesRequest.js'
+import { getCancelledRoutes, getRecentRide, getRequestRide, getRouteRequest, rateUser, RouteCancelled, RouteRequest, updateRoutesToCompleted } from '../Controllers/Passenger/RoutesRequest.js'
 import { Location } from '../Controllers/Passenger/Map.js'
 import { CancelledAllPotentialDrivers, driverSelected, GetAllPotentialRide, getRides } from '../Controllers/Passenger/GetPotentialDriver.js';
 import { Booking, cancelBooking, getBookings, markBookingAsDone } from '../Controllers/Passenger/Booking.js';
@@ -42,6 +42,7 @@ router.post('/fetchBookedCarpools',fetchBookedCarpools)
 router.post('/cancelBooking',cancelBooking)
 router.post('/markBookingAsDone',markBookingAsDone)
 router.put("/routeCancelled", RouteCancelled)
+router.post("/rateUser", rateUser)
 
 
 export default router;

@@ -117,7 +117,27 @@ const googleLogin = async (req, res) => {
 
 
 const getUsers = (req, res) => {
-    connection.query('SELECT * FROM USERS', (err, results) => {
+    // connection.query('SELECT * FROM USERS as u INNER JOIN  Vehicle as v On v.userId = u.userId', (err, results) => {
+    const query =`
+        SELECT u.*, 
+            v.vehicleId, 
+            v.userId AS driverId, 
+            v.carType, 
+            v.manufacturerName, 
+            v.modelName, 
+            v.modelYear, 
+            v.vehiclePlateNo, 
+            v.vehicleSets, 
+            v.vehicleColor, 
+            v.typeRide
+        FROM USERS AS u
+        LEFT JOIN Vehicle AS v ON v.userId = u.userId
+        WHERE u.userType IN ('D', 'P');
+
+ 
+
+    `
+    connection.query(query, (err, results) => {
         if (err) {
             console.error(err);
             res.status(500).send({
