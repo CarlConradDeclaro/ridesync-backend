@@ -218,46 +218,77 @@ const RouteCancelled = async (req, res) => {
     const { userId, yourDriver } = req.body;
 
     try {
+        // Update Routes and PotentialDrivers first
         const query = `
             UPDATE Routes
             SET status = 'Cancelled'
-            WHERE  userId = ? AND status = 'onGoing'  OR status = "pending"
-        `
+            WHERE userId = ? AND (status = 'onGoing' OR status = 'pending')
+        `;
         const query2 = `
-        UPDATE PotentialDrivers
-        SET status = 'cancelled'
-        WHERE passengerId = ? AND status = "waiting" || status = "matched"
-    `;
+            UPDATE PotentialDrivers
+            SET status = 'cancelled'
+            WHERE passengerId = ? AND (status = 'waiting' OR status = 'matched')
+        `;
+
+        await new Promise((resolve, reject) => {
+            connection.query(query, [userId], (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
+            });
+        });
+
+        await new Promise((resolve, reject) => {
+            connection.query(query2, [userId], (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
+            });
+        });
+
+        // Fetch the last cancelled routeId for the user
+        const getRouteQuery = `
+            SELECT routeId
+            FROM Routes
+            WHERE status = 'Cancelled' AND userId = ?
+            ORDER BY routeId DESC
+            LIMIT 1
+        `;
+
+        const lastCancelledRoute = await new Promise((resolve, reject) => {
+            connection.query(getRouteQuery, [userId], (err, results) => {
+                if (err) return reject(err);
+                resolve(results[0]?.routeId); // Get the routeId or undefined if no result
+            });
+        });
+
+        if (!lastCancelledRoute) {
+            return res.status(404).json({ message: "No cancelled route found for the user" });
+        }
+
+        // Update Rides with the fetched routeId
         const query3 = `
             UPDATE Rides
             SET rideStatus = 'cancelled'
-            WHERE   rideStatus = "pending" || rideStatus = "matched"  || rideStatus = "onGoing" 
+            WHERE routeId = ? AND (rideStatus = 'pending' OR rideStatus = 'matched' OR rideStatus = 'onGoing')
         `;
 
         const result = await new Promise((resolve, reject) => {
-            connection.query(query, [userId], (err, results) => {
-                if (err) return reject(err)
-                resolve(results)
-            })
-            connection.query(query2, [userId], (err, results) => {
-                if (err) return reject(err)
-                resolve(results)
-            })
-            connection.query(query3, (err, results) => {
-                if (err) return reject(err)
-                resolve(results)
-            })
-        })
+            connection.query(query3, [lastCancelledRoute], (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
+            });
+        });
 
         if (result.affectedRows > 0)
-            res.status(200).json({ message: "Route updated successfully" })
+            res.status(200).json({ message: "Route updated successfully" });
         else
-            res.status(400).json({ message: 'Failed to update' })
+            res.status(400).json({ message: "Failed to update" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server error' })
+        res.status(500).json({ message: "Server error" });
     }
-}
+};
+
+
 
 
 const getCancelledRoutes = async (req, res) => {

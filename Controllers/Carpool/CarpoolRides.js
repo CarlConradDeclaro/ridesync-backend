@@ -1,3 +1,4 @@
+import { query } from "express";
 import connection from "../../Database/Connection/Connection.js";
 
 const createCarpoolRide = async(req,res)=>{
@@ -270,8 +271,87 @@ const fetchBookedCarpools = async(req,res)=>{
 }
 
 
+const getCompletedCarpools = async(req,res)=>{
+    const {userId} =req.body
+    const query = `
+        SELECT * 
+        FROM CarpoolRoutes as cr
+        WHERE cr.userId = ?;
+    `
+    try {
+        const result = await new Promise((resolve,reject)=>{
+            connection.query(query,[userId],(err,results)=>{
+                if(err)return reject(err)
+                resolve(results)   
+            })
+        })
+        if(result.length > 0){
+            res.status(200).send(result)
+        }else{
+            res.send({message:"failed to fetch carpool passengers"})
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Server error" }); 
+    }
+}
+
+const getCarpoolPassengers = async(req,res)=>{
+    const {carpoolRouteId} = req.body
+    // const query = `
+    //     SELECT u.*
+    //     FROM CarpoolPassengers as c 
+    //     INNER JOIN Users as u ON u.userId = c.passengerId
+    //     WHERE carpoolRouteId = ?;
+    // `
+
+    const query = `
+        SELECT *
+        FROM CarpoolPassengers;
+    `
+    try {
+        const result = await new Promise((resolve,reject)=>{
+            connection.query(query,[carpoolRouteId],(err,results)=>{
+                if(err)return reject(err)
+                resolve(results)   
+            })
+        })
+        if(result.length > 0){
+            res.status(200).send(result)
+        }else{
+            res.send({message:"failed to fetch carpool passengers"})
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Server error" }); 
+    }
+}
+
+const markCarpoolCompleted = async(req, res) => {
+    const { routeId } = req.body;
+    if (!routeId) {
+        return res.status(400).json({ error: 'routeId is required' });
+    }
+    const query = `
+        UPDATE CarpoolRoutes
+        SET status = 'completed'
+        WHERE routeId = ?;
+    `;
+    try {
+        const result = connection.query(query, [routeId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Carpool not found' });
+        }
+        return res.status(200).json({ message: 'Carpool marked as completed' });
+    } catch (error) {
+        console.error('Error marking carpool as completed:', error);
+        return res.status(500).json({ error: 'An error occurred while updating the carpool' });
+    }
+};
+
 
 
 export{createCarpoolRide,fetchCarpoolRide,fetchAllCarpoolRide,CarpoolPassenger,isBookedAlready,
-    fetchPassengers,isCarpoolBooked,fetchBookedCarpools
+    fetchPassengers,isCarpoolBooked,fetchBookedCarpools,getCompletedCarpools,getCarpoolPassengers,
+    markCarpoolCompleted
 }
