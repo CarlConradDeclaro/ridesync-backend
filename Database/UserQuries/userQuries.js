@@ -16,17 +16,17 @@ export const checkEmailExists = (email) => {
     })
 }
 export const registerPassengerQuery = (userData) => {
-    const { userLn, userFn, userEmail, userPhone, userPassword, userType, userRating, gender, country, demoStat
+    const { userLn, userFn, userEmail, userPhone, userAge,userPassword, userType, userRating, gender, country, demoStat
      } = userData;
     const query = `
-    INSERT INTO Users (userLn, userFn, userEmail, userPhone,
+    INSERT INTO Users (userLn, userFn, userEmail, userPhone,age,
                        userPassword, userType, userRating,Gender,Country,DemoStat) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`
+                       VALUES (?, ?, ?, ?,?, ?, ?, ?,?,?,?)`
 
 
     return new Promise((resolve, reject) => {
         connection.query(query,
-            [userLn, userFn, userEmail, userPhone, userPassword, userType, userRating, gender, country, demoStat],
+            [userLn, userFn, userEmail, userPhone, userAge, userPassword, userType, userRating, gender, country, demoStat],
             (err) => {
                 if (err) {
                     return reject(err)

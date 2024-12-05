@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { registerUser, getUsers, logInUser, googleLogin } from '../Controllers/UserControllers.js';
+import { registerUser, getUsers, logInUser, googleLogin, updateProfile } from '../Controllers/UserControllers.js';
 import { getCancelledRoutes, getRecentRide, getRequestRide, getRouteRequest, rateUser, RouteCancelled, RouteRequest, updateRoutesToCompleted } from '../Controllers/Passenger/RoutesRequest.js'
 import { Location } from '../Controllers/Passenger/Map.js'
 import { CancelledAllPotentialDrivers, driverSelected, GetAllPotentialRide, getRides } from '../Controllers/Passenger/GetPotentialDriver.js';
@@ -43,6 +43,6 @@ router.post('/cancelBooking',cancelBooking)
 router.post('/markBookingAsDone',markBookingAsDone)
 router.put("/routeCancelled", RouteCancelled)
 router.post("/rateUser", rateUser)
-
+router.post("/updateProfile",updateProfile)
 
 export default router;

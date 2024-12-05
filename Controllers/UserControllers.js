@@ -15,7 +15,7 @@ const createToken = (id) => {
 
 const registerUser = async (req, res) => {
     try {
-        const { userLn, userFn, userEmail, userPhone, userPassword, userType, userRating, gender, country, demoStat } = req.body;
+        const { userLn, userFn, userEmail, userPhone, userAge,userPassword, userType, userRating, gender, country, demoStat } = req.body;
 
         const emailExists = await checkEmailExists(userEmail);
         if (emailExists) {
@@ -32,6 +32,7 @@ const registerUser = async (req, res) => {
             userFn,
             userEmail,
             userPhone,
+            userAge,
             userPassword: hashedPassword,
             userType,
             userRating,
@@ -149,4 +150,33 @@ const getUsers = (req, res) => {
     });
 }
 
-export { registerUser, getUsers, logInUser, googleLogin };
+
+const updateProfile = async (req, res) => {
+    const { firstname, lastname, email, phonNum, userId } = req.body;
+
+    // if (!firstname || !lastname || !email || !phonNum || !userId) {
+    //     return res.status(400).json({ message: 'All fields are required' });
+    // }
+
+    const query = `
+        UPDATE Users
+        SET userLn = ?, userFn = ?, userEmail = ?, userPhone = ?
+        WHERE userId = ?;
+    `;
+
+    connection.query(query, [firstname, lastname, email, phonNum, userId], (err, result) => {
+        if (err) {
+            console.error('Error updating profile:', err);
+            return res.status(500).json({ message: 'Failed to update profile' });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'Profile updated successfully' });
+    });
+};
+
+
+export { registerUser, getUsers, logInUser, googleLogin ,updateProfile};
