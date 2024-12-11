@@ -19,7 +19,7 @@ const GetAllPotentialRide = async (req, res) => {
 
 
 const driverSelected = async (req, res) => {
-    const { userId, driverId } = req.body;
+    const { userId, driverId, drivers } = req.body;
 
     const query1 = `
         UPDATE PotentialDrivers
@@ -32,11 +32,12 @@ const driverSelected = async (req, res) => {
         SET status = 'onGoing'
         WHERE userId = ? AND status = "pending"
     `;
+
     const query3 = `
         UPDATE Rides
         SET rideStatus = 'onGoing'
         WHERE driverId = ? AND rideStatus = "pending"
-        `;
+    `;
 
     const query4 = `
         UPDATE PotentialDrivers
@@ -44,8 +45,14 @@ const driverSelected = async (req, res) => {
         WHERE passengerId = ? AND status = "waiting" AND driverId = ?
     `;
 
+    const query5 = `
+        UPDATE Rides
+        SET rideStatus = 'rejected'
+        WHERE driverId IN (?) AND rideStatus = 'pending'
+    `;
+
     try {
-        // Wrap the query in a promise to handle both asynchronously
+        // Wrap the queries in promises
         const updateQuery1 = new Promise((resolve, reject) => {
             connection.query(query1, [userId, driverId], (err, results) => {
                 if (err) reject(err);
@@ -74,9 +81,21 @@ const driverSelected = async (req, res) => {
             });
         });
 
+        // Handle `query5` dynamically with `drivers`
+        const updateQuery5 = new Promise((resolve, reject) => {
+            if (!drivers || drivers.length === 0) {
+                resolve(); // No drivers to update
+                return;
+            }
 
-        // Wait for both updates to complete
-        const [result1, result2] = await Promise.all([updateQuery1, updateQuery2, updateQuery3, updateQuery4]);
+            connection.query(query5, [drivers], (err, results) => {
+                if (err) reject(err);
+                else resolve(results);
+            });
+        });
+
+        // Wait for all updates to complete
+        await Promise.all([updateQuery1, updateQuery2, updateQuery3, updateQuery4, updateQuery5]);
 
         res.json({ message: 'Status updated to onGoing' });
     } catch (err) {

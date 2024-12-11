@@ -27,12 +27,16 @@ export const registerPassengerQuery = (userData) => {
     return new Promise((resolve, reject) => {
         connection.query(query,
             [userLn, userFn, userEmail, userPhone, userAge, userPassword, userType, userRating, gender, country, demoStat],
-            (err) => {
+            (err,results) => {
                 if (err) {
                     return reject(err)
                 }
-               
-                  resolve();
+                console.log("User inserted:", results); // Log the result of the insert query
+            if (results && results.insertId) {
+                resolve({ userId: results.insertId });
+            } else {
+                reject(new Error("Failed to insert user"));
+            }
                  
             })
     })
@@ -85,6 +89,7 @@ export const getUserByEmail = (email) => {
             if (err) {
                 return reject(err)
             }
+            console.log("Results from DB query:", results);
             resolve(results[0])
         })
     })
