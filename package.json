@@ -4,6 +4,7 @@
   "description": "",
   "type": "module",
   "main": "index.js",
+  "start": "node index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +20,7 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.11.3",
+    "ngrok": "^5.0.0-beta.2",
     "node-fetch": "^3.3.2",
     "nodemon": "^3.1.7",
     "socket.io": "^4.8.1",

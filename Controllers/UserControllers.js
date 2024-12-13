@@ -216,7 +216,7 @@ const getUsers = (req, res) => {
             v.vehicleSets, 
             v.vehicleColor, 
             v.typeRide
-        FROM USERS AS u
+        FROM Users AS u
         LEFT JOIN Vehicle AS v ON v.userId = u.userId
         WHERE u.userType IN ('D', 'P');
 

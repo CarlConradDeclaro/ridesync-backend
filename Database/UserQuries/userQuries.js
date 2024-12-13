@@ -3,7 +3,7 @@ import connection from "../Connection/Connection.js"
 
 export const checkEmailExists = (email) => {
     const query = `
-            SELECT * FROM USERS 
+            SELECT * FROM Users 
             WHERE userEmail = ?`
 
     return new Promise((resolve, reject) => {
@@ -82,7 +82,7 @@ export const registerUserQuery = (userData) => {
 export const getUserByEmail = (email) => {
     const query = `
                      SELECT * 
-                     FROM  USERS 
+                     FROM  Users 
                      WHERE userEmail = ?`
     return new Promise((resolve, reject) => {
         connection.query(query, [email], (err, results) => {

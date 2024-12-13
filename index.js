@@ -15,10 +15,19 @@ const server = createServer(app)
 
 
 app.use(express.json())
-app.use(cors({//
-    origin: ['http://localhost:5173','http://192.168.0.184:5173'],
+// app.use(cors({//
+//     origin: ['http://localhost:5173','http://192.168.0.184:5173','https://delicate-churros-85e0d1.netlify.app'],
+//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+//     // credentials: true // If you need to include credentials in requests
+// }));
+app.use(cors({
+    origin: [
+        'http://localhost:5173',
+        'http://192.168.0.184:5173',
+        'https://wondrous-lokum-caf524.netlify.app',
+        'https://05f9-131-226-110-74.ngrok-free.app' // Add Ngrok URL
+    ], 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    // credentials: true // If you need to include credentials in requests
 }));
 
 app.get('/', (req, res) => {
@@ -30,7 +39,12 @@ app.use("/api/drivers", driverRoute)
 
 const io = new IO(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: [
+            "http://localhost:5173",
+            'http://192.168.0.184:5173',
+            'https://wondrous-lokum-caf524.netlify.app',
+            'https://05f9-131-226-110-74.ngrok-free.app'
+        ],
         methods: ["GET", "POST"],
     },
 })

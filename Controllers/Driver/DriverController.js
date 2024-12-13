@@ -120,7 +120,7 @@ const driverRole = (req, res) => {
 
 
 const getUsers = (req, res) => {
-    connection.query('SELECT * FROM USERS', (err, results) => {
+    connection.query('SELECT * FROM Users', (err, results) => {
         if (err) {
             console.error(err);
             res.status(500).send({
