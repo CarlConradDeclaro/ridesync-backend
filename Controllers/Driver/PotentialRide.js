@@ -35,7 +35,7 @@ const Ride = async (req, res) => {
     console.log("Received data:", req.body)
 
     const query = `
-       INSERT INTO RIDES(driverId,routeId)
+       INSERT INTO Rides(driverId,routeId)
        VALUES(?,?)
     `
 
