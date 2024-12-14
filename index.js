@@ -24,7 +24,7 @@ app.use(cors({
     origin: [
         'http://localhost:5173',
         'http://192.168.0.184:5173',
-        'https://friendly-tarsier-742d29.netlify.app',
+        'https://ridesync.netlify.app',
         'https://05f9-131-226-110-74.ngrok-free.app' // Add Ngrok URL
     ], 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
@@ -42,7 +42,7 @@ const io = new IO(server, {
         origin: [
             "http://localhost:5173",
             'http://192.168.0.184:5173',
-            'https://friendly-tarsier-742d29.netlify.app',
+            'https://ridesync.netlify.app',
             'https://05f9-131-226-110-74.ngrok-free.app'
         ],
         methods: ["GET", "POST"],
