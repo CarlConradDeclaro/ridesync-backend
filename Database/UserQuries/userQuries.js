@@ -49,8 +49,8 @@ export const registerUserQuery = (userData) => {
      } = userData;
     const query = `
     INSERT INTO Users (userLn, userFn, userEmail, userPhone,
-                       userPassword, userType, userRating,Gender,Country,DemoStat) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?)`
+                       userPassword, userType, userRating,Gender,Country,DemoStat,typeRide) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?,?,?,?,?)`
 
      const query2 = `
                        INSERT INTO Vehicle (userId, carType, manufacturerName, modelName, modelYear, 
