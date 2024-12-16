@@ -280,5 +280,83 @@ const deleteProfile =async(req,res)=>{
   }
 }
 
+const checkUserHasPassword = async (userId) => {
+    try {
+        const query = `
+            SELECT userPassword FROM Users WHERE userId = ?
+        `;
+        const result = await new Promise((resolve, reject) => {
+            connection.query(query, [userId], (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
+            });
+        });
 
-export { registerUser, getUsers, logInUser, googleLogin ,updateProfile,deleteProfile};
+        if (result.length > 0 && result[0].userPassword === null) {
+            console.log("User registered with Google or third-party sign-in.");
+            return true;  // User can change password without current password
+        } else {
+            console.log("User has a password.");
+            return false; // User must provide current password to change
+        }
+
+    } catch (error) {
+        console.error("Error checking user password:", error);
+        return false;
+    }
+};
+
+ 
+const updatePassword = async (req, res) => {
+    const { userId, currentPassword, newPassword, hashedPassword } = req.body;
+
+    try {
+        // Check if the user has a password or not (Google login or regular login)
+        const isAllowedToChangePass = await checkUserHasPassword(userId);
+
+        // If the user has a password, check if the current password is provided and correct
+        if (!isAllowedToChangePass) {
+            if (!currentPassword || !newPassword || !hashedPassword) {
+                return res.status(400).json({ message: "Please fill in all required fields!", status: false });
+            }
+
+            // Validate the current password by comparing it to the stored hashed password
+            const isCorrectPassword = await bcrypt.compare(currentPassword, hashedPassword);
+            if (!isCorrectPassword) {
+                return res.status(400).json({ message: "Current password is incorrect.", status: false });
+            }
+        }
+
+        // Hash the new password
+        const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the password in the database
+        const updateQuery = `
+            UPDATE Users SET userPassword = ? WHERE userId = ?
+        `;
+
+        const result = await new Promise((resolve, reject) => {
+            connection.query(updateQuery, [hashedNewPassword, userId], (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
+            });
+        });
+
+        // Check if the update was successful
+        if (result.affectedRows > 0) {
+            return res.status(200).json({ message: "Password updated successfully.", status: true });
+        } else {
+            return res.status(400).json({ message: "Failed to update the password.", status: false });
+        }
+    } catch (error) {
+        console.error("Error updating password:", error);
+        res.status(500).json({ message: "An error occurred while updating the password.", status: false });
+    }
+};
+
+
+
+
+export {registerUser, getUsers, logInUser, googleLogin ,updateProfile,deleteProfile,
+        updatePassword
+};

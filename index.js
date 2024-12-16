@@ -16,16 +16,16 @@ const server = createServer(app)
 
 app.use(express.json())
 // app.use(cors({//
-//     origin: ['http://localhost:5173','http://192.168.0.184:5173','https://delicate-churros-85e0d1.netlify.app'],
+//     origin: ['http://localhost:5173','http://192.168.0.189:5173','https://delicate-churros-85e0d1.netlify.app'],
 //     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 //     // credentials: true // If you need to include credentials in requests
 // }));
+
 app.use(cors({
     origin: [
         'http://localhost:5173',
-        'http://192.168.0.184:5173',
-        'https://ridesync.netlify.app',
-        'https://05f9-131-226-110-74.ngrok-free.app' // Add Ngrok URL
+        'http://192.168.0.15:5173',
+        'https://ridesync.netlify.app', 
     ], 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
 }));
@@ -41,9 +41,8 @@ const io = new IO(server, {
     cors: {
         origin: [
             "http://localhost:5173",
-            'http://192.168.0.184:5173',
+            'http://192.168.0.15:5173',
             'https://ridesync.netlify.app',
-            'https://05f9-131-226-110-74.ngrok-free.app'
         ],
         methods: ["GET", "POST"],
     },
